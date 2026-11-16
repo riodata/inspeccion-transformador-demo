@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Inspección Remota Inmersiva — Transformador de distribución | Río Data Análisis</title>
+    <meta name="description" content="Demostración de inspección remota inmersiva de un transformador de distribución mediante fotogrametría con dron y Gaussian Splatting. Río Data Análisis." />
+    <link rel="icon" href="branding/favicon-riodata.png">
+    <link rel="stylesheet" href="src/style.css">
+    <script type="importmap">
+      {
+        "imports": {
+          "playcanvas": "https://cdn.jsdelivr.net/npm/playcanvas@2.17.2/build/playcanvas.mjs"
+        }
+      }
+    </script>
+    <script type="module" src="https://cdn.jsdelivr.net/npm/@playcanvas/web-components@0.3.0/dist/pwc.mjs"></script>
+    <script type="module" src="src/app.js"></script>
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <div class="brand-block">
+          <img class="brand-logo" src="branding/logo-riodata-blanco.png" alt="Río Data — Drones + IA + Análisis de datos" />
+          <div>
+            <p class="eyebrow">Inspección Remota Inmersiva · Demostración</p>
+            <h1>Transformador de distribución</h1>
+          </div>
+        </div>
+        <div class="actions">
+          <button id="resetBtn" type="button">Vista inicial</button>
+          <button id="metaBtn" type="button" style="display:none">Datos del relevamiento</button>
+          <button id="candidateBtn" type="button" disabled>Fotografías de esta vista</button>
+          <button id="openPhotoBtn" type="button" disabled>Ampliar fotografía</button>
+        </div>
+      </header>
+
+      <main class="content">
+        <section class="viewer-card">
+          <div class="viewer-toolbar hidden-toolbar">
+            <span class="status-dot"></span>
+            <span id="statusText"></span>
+          </div>
+
+          <div class="viewer-wrap" id="viewerWrap">
+            <pc-app id="pcApp" antialias="false" high-resolution="false" mouse keyboard touch>
+              <pc-asset id="camera-controls" src="https://cdn.jsdelivr.net/npm/playcanvas@2.17.2/scripts/esm/camera-controls.mjs" preload></pc-asset>
+              <pc-asset id="activo-splat" src="data/activo.sog" preload></pc-asset>
+
+              <pc-scene>
+                <pc-entity id="cameraRig" name="cameraRig" position="0 0 3">
+                  <pc-camera clear-color="#0b1220"></pc-camera>
+                  <pc-scripts>
+                    <pc-script name="cameraControls"></pc-script>
+                  </pc-scripts>
+                </pc-entity>
+
+                <pc-entity id="splatRoot" name="splatRoot" position="0 0 0" rotation="180 0 0">
+                  <pc-splat asset="activo-splat"></pc-splat>
+                </pc-entity>
+              </pc-scene>
+            </pc-app>
+
+            <div class="viewer-overlay" id="viewerOverlay">
+              <div class="overlay-card">
+                <h2>Cargando modelo 3D</h2>
+                <p>La descarga del modelo puede demorar algunos segundos según la conexión.</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <aside class="side-panel">
+          <div class="info-card">
+            <h2>Activo</h2>
+            <p>Transformador de distribución montado en estructura sobre vía pública, relevado con dron para su inspección remota.</p>
+          </div>
+
+          <div class="info-card" id="candidateCard">
+            <h2>Fotografías de la vista</h2>
+            <p id="candidateStatus">Oriente el modelo hacia la zona de interés y presione <strong>Fotografías de esta vista</strong>.</p>
+            <div id="candidateGrid" class="candidate-grid"></div>
+          </div>
+
+          <div class="info-card">
+            <h2>Navegación</h2>
+            <ul>
+              <li>Botón izquierdo: orbitar</li>
+              <li>Botón derecho: desplazar</li>
+              <li>Rueda: acercar y alejar</li>
+              <li>En la fotografía ampliada: rueda para zoom, arrastre para desplazar</li>
+            </ul>
+          </div>
+
+          <div class="info-card" id="metaCard">
+            <h2>Datos del relevamiento</h2>
+            <p id="metaStatus">Cargando datos del relevamiento…</p>
+            <ul id="metaList"></ul>
+          </div>
+
+          <div class="info-card">
+            <h2>Alcance</h2>
+            <p>Modelo de carácter ilustrativo, sin calibración métrica: no admite mediciones. La ubicación del activo se omite deliberadamente. La plataforma admite, en relevamientos calibrados, la medición de distancias sobre el modelo.</p>
+            <p>Desarrollado por <a href="https://riodataanalisis.com.ar" target="_blank" rel="noopener">Río Data Análisis</a>.</p>
+          </div>
+        </aside>
+      </main>
+    </div>
+
+    <div id="photoModal" class="photo-modal hidden" aria-hidden="true">
+      <div id="photoBackdrop" class="photo-backdrop"></div>
+      <div class="photo-dialog" role="dialog" aria-modal="true" aria-labelledby="photoTitle">
+        <div class="photo-topbar">
+          <div>
+            <h2 id="photoTitle">Fotografía seleccionada</h2>
+            <p id="photoMeta"></p>
+          </div>
+          <div class="photo-actions">
+            <button id="zoomOutBtn" type="button">−</button>
+            <button id="zoomInBtn" type="button">+</button>
+            <button id="zoomResetBtn" type="button">Restablecer zoom</button>
+            <button id="closePhotoBtn" type="button">Cerrar</button>
+          </div>
+        </div>
+        <div id="photoViewport" class="photo-viewport">
+          <img id="photoImg" class="photo-img" alt="Fotografía aérea del activo" draggable="false" />
+          <div id="photoEmpty" class="photo-empty">La fotografía se mostrará aquí.</div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
